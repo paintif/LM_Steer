@@ -42,17 +42,20 @@ One can also continuously steer LMs simply by scaling the LM-Steer, or compose m
 
 ## Table of Contents
 
-- [Requirements](#requirements)
-- [Usage](#usage)
-  - [1. Preparing Data](#1-preparing-data)
-  - [2. Training and Evaluation](#2-training-and-evaluation)
-    - [2.1. LM-Steer for Detoxification](#21-lm-steer-for-detoxification)
-    - [2.2. LM-Steer for Sentiment Control](#22-lm-steer-for-sentiment-control)
-  - [3. Other Analytical Experiments](#3-other-analytical-experiments)
-    - [3.1. LM-Steer Interpretation](#31-lm-steer-interpretation)
-    - [3.2. LM-Steer Transfer](#32-lm-steer-transfer)
-    - [3.3. LM-Steer Composition and Continuous Steering](#33-lm-steer-composition-and-continuous-steering)
-- [Citation](#citation)
+- [🛞 LM-Steer: Word Embeddings Are Steers for Language Models](#-lm-steer-word-embeddings-are-steers-for-language-models)
+  - [Introduction](#introduction)
+  - [Table of Contents](#table-of-contents)
+  - [Requirements](#requirements)
+  - [Usage](#usage)
+    - [1. Preparing Data](#1-preparing-data)
+    - [2. Training and Evaluation](#2-training-and-evaluation)
+      - [2.1. LM-Steer for Detoxification](#21-lm-steer-for-detoxification)
+      - [2.2. LM-Steer for Sentiment Control](#22-lm-steer-for-sentiment-control)
+    - [3. Other Analytical Experiments](#3-other-analytical-experiments)
+      - [3.1. LM-Steer Interpretation](#31-lm-steer-interpretation)
+      - [3.2. LM-Steer Transfer](#32-lm-steer-transfer)
+      - [3.3. LM-Steer Composition and Continuous Steering](#33-lm-steer-composition-and-continuous-steering)
+  - [Citation](#citation)
 
 
 ## Requirements
