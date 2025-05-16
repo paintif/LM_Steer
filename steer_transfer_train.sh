@@ -1,3 +1,4 @@
+TRIAL="transfer"
 PYTHONPATH=. python experiments/steer_transfer.py \
     --ckpt_name logs/reproduction/gpt2-large.pt \
     --n_steps 5000 --lr 0.01\
