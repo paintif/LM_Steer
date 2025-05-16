@@ -6,7 +6,12 @@ from torch.optim import Adam
 
 
 def main(args):
-    ckpt = torch.load(args.ckpt_name)
+    # 修改load ，避免安全性报错
+    from torch.serialization import add_safe_globals
+    from argparse import Namespace
+    add_safe_globals([Namespace])
+    ckpt = torch.load(args.ckpt_name, weights_only=False)
+    
     device = torch.device("cuda:0")
 
     print("loading model 1", args.model_name)

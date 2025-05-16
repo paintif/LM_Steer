@@ -12,7 +12,8 @@ class Projected_Adaptor(nn.Module):
     """
     
     def __init__(self, lm_head, adaptor_class, num_steers, embed_dim,
-                 vocab_size, rank, epsilon, init_var, position="output"):
+                 vocab_size, rank, epsilon, init_var, position="output",
+                 hidden_dim=None, num_layers=3, dropout_rate=0.1):
         """初始化投影适配器。
 
         Args:
@@ -46,7 +47,7 @@ class Projected_Adaptor(nn.Module):
             self.offset_vec = nn.Parameter(torch.randn(
                 num_steers, vocab_size
             ))
-                elif adaptor_class == "nonlinear":
+        elif adaptor_class == "nonlinear":
             # replace the linear layer with a multi-layer perceptron
             hidden_dim = hidden_dim or embed_dim
             self.steer_nets = nn.ModuleList([
