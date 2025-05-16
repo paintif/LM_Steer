@@ -311,6 +311,7 @@ def main(generations_file, output_file, metrics, extra):
         extra: 额外参数
     """
     # 检查输入文件是否存在
+    print(generations_file)
     assert os.path.exists(generations_file)
     output_dir = Path(os.path.dirname(generations_file))
     
