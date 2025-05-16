@@ -11,19 +11,21 @@ model = XLMRobertaForSequenceClassification.from_pretrained(
     's-nlp/xlmr_formality_classifier')
 
 id2formality = {0: "formal", 1: "informal"}
-
+# autodl-tmp/LM-Steer/logs/formality-2
 # input files
+# 要评估的文件放入即可
 input_files = [
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/formality/gpt2-large-process-formal-1-pos-predictions-500.jsonl',
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/formality-2/gpt2-process-formal-2-pos-predictions-500.jsonl',
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/formality-2/gpt2-process-formal-2-neg-predictions-500.jsonl',
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/formality-2/gpt2-medium-process-formal-2-neg-predictions-500.jsonl',
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/formality-2/gpt2-medium-process-formal-2-pos-predictions-500.jsonl',
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/formality-2/gpt2-large-process-formal-2-pos-predictions-500.jsonl',
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/formality-2/gpt2-large-process-formal-2-neg-predictions-500.jsonl',
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/origin/gpt2-process-origin-predictions-500.jsonl',
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/origin/gpt2-medium-process-origin-predictions-500.jsonl',
-    '/home/wendell/root/LM-Steer-main/LM-Steer-main/logs/origin/gpt2-large-process-origin-predictions-500.jsonl',
+    'logs/formality-2/gpt2-large-process-formal-2-predictions-500.jsonl',
+    # autodl-tmp/LM-Steer/logs/formality-2/gpt2-large-process-formal-2-predictions-500.jsonl
+    # '/logs/formality-2/gpt2-process-formal-2-pos-predictions-500.jsonl',
+    # '/logs/formality-2/gpt2-process-formal-2-neg-predictions-500.jsonl',
+    # '/logs/formality-2/gpt2-medium-process-formal-2-neg-predictions-500.jsonl',
+    # '/logs/formality-2/gpt2-medium-process-formal-2-pos-predictions-500.jsonl',
+    # '/logs/formality-2/gpt2-large-process-formal-2-pos-predictions-500.jsonl',
+    # '/logs/formality-2/gpt2-large-process-formal-2-neg-predictions-500.jsonl',
+    # '/logs/formality-2/gpt2-process-origin-predictions-500.jsonl',
+    # '/logs/formality-2/gpt2-medium-process-origin-predictions-500.jsonl',
+    # '/logs/formality-2/gpt2-large-process-origin-predictions-500.jsonl',
 ]
 
 # check if all input files exist
