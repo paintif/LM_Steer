@@ -44,7 +44,7 @@ def load_sentiment_data(dataset_name):
         dataset.extend(sst5)
     elif dataset_name == "sentiment-sst5-positive":
         sst5 = list(load_huggingface_dataset("SetFit/sst5")["train"])
-        sst5 = [d for d in sst5 if d["label"] == 4]
+        sst5 = [d for d in sst5 if d["label"] == 1]
         for _datum in sst5:
             _datum["label"] = _datum["label"] / 2 - 1
             _datum.pop("label_text")
@@ -59,6 +59,8 @@ def load_sentiment_data(dataset_name):
     elif dataset_name == "sentiment-zh":
         sst_zh = list(load_huggingface_dataset("tyqiangz/multilingual-sentiments", "chinese", trust_remote_code=True))
         dataset.extend(sst_zh)
+        
+
     return dataset
 
 
@@ -87,7 +89,7 @@ def load_dataset(dataset_name, data_dir, subset):
         dataset = load_toy_sentiment_data(dataset_name)
     elif dataset_name == "toxicity_zh":
         dataset = []
-        with open("data/toxicity/zh_dataset.json", 'r', encoding='utf-8') as f:
+        with open("/home/qiujiabin/LM-Steer/data/toxicity/zh_dataset.json", 'r', encoding='utf-8') as f:
             for line in f:
                 item = json.loads(line)
                 dataset.append(item)

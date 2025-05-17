@@ -57,6 +57,13 @@ def main(args):
         if args.dummy_steer is not None:
             batch_stance[:, args.dummy_steer] = 1
         batch_text = batch["text"]
+        
+        if tokenizer.pad_token == None:
+            tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+        # tokenized = tokenizer(batch_text, padding=True,
+        #                       max_length=args.max_length, truncation=True)
+        # input_ids = torch.LongTensor(tokenized["input_ids"]).to(device)
+        
         tokenized = tokenizer(batch_text, padding=True,
                               max_length=args.max_length, truncation=True)
         input_ids = torch.LongTensor(tokenized["input_ids"]).to(device)

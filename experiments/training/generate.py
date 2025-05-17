@@ -58,10 +58,13 @@ def main(args):
     ckpt = torch.load(args.ckpt_name, weights_only=False)
     model.load_state_dict(ckpt[1])
 
+    if tokenizer.pad_token == None:
+        tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+
     # predicting sentences
     with open(args.eval_file, "r") as f:
         prompt_data = list(map(json.loads, f.readlines()))
-
+        
     model.eval()
     prompt_num = 25
     prompt_length = 20
