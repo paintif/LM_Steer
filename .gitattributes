@@ -1,0 +1,8 @@
+# 对所有文本文件强制使用LF
+* text eol=lf
+
+# 可选：对特定文件类型进一步明确（冗余但更清晰）
+*.py text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+*.sh text eol=lf
