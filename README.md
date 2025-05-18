@@ -1,246 +1,157 @@
-# 🛞 LM-Steer: Word Embeddings Are Steers for Language Models
+## LM-Steer 论文复现与拓展实验
 
-[![arXiv](https://img.shields.io/badge/arXiv-2305.12798-b31b1b.svg)](https://arxiv.org/abs/2305.12798)
-[![ACL 2024 Outstanding Paper Award](https://img.shields.io/badge/ACL%202024-Outstanding%20Paper%20Award-ffcc00.svg)](https://acl2024.org/)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-LM--Steer-ff69b4.svg)](https://huggingface.co/spaces/Glaciohound/LM-Steer)
+**本实验修改自**：https://github.com/Glaciohound/LM-Steer.git
+本实验共包含以下部分：
+1. 毒性控制实验复现
+2. 情感控制复现
+3. 模型迁移实验复现
+4. 连续控制实验
+5. 协同控制实验
+6. 风格迁移实验
+7. 中文扩展实验
+8. 输入层词嵌入实验
+9. 自适应情感控制
+10. 非线性的控制器
+其中1-5为论文复现部分，6-10为创新拓展部份。
 
-Official Code Repository for the paper ["**LM-Steer: Word Embeddings Are Steers for Language Models**"](https://arxiv.org/abs/2305.12798) (**ACL 2024 Outstanding Paper Award**) by Chi Han, Jialiang Xu, Manling Li, Yi Fung, Chenkai Sun, Nan Jiang, Tarek Abdelzaher, Heng Ji.
+实验作者（按名字字母排序）
+1. 蔡嘉豪 南京大学
+2. 何志烨 南京大学
+3. 邱嘉彬 南京大学
+4. 郑儒杰 南京大学
+### **实验流程总览** 
 
-[**Live Demo**](https://huggingface.co/spaces/Glaciohound/LM-Steer) | [**Paper**](https://arxiv.org/abs/2305.12798) | [**Slides**](assets/slides.pdf) | [**Poster**](assets/poster.pdf)
+所有实验均包含 **train（训练）、generate（生成）、evaluate（评估）** 三个核心阶段。其中为了节约 generate 的时间，可以执行采样脚本（data/prompts/sample_prompts.py），指定采样数量以抽取部分数据用于生成，快速验证结果。 
+#### 1. **训练阶段（Train）**
+- **数据格式**：不同实验的训练数据集格式各异，细节无需深入。 
+	- **毒性控制实验**：数据集下载至本地存储。
+	- **情感控制实验**：通过 API 远程访问数据集。
+	- **其他**：包含小组自主整理的定制化数据集。
+#### 2. **生成阶段（Generate）** 
+- **核心逻辑**：基于 `prompt` 生成语句，再对生成内容进行评估。
+- **数据格式**：生成阶段数据集多以 `prompt.json` 格式存在，用于提供生成引导文本。
+- **关键参数**： 
+	- `dataset_name`：指定加载的数据集，支持的数据集可通过代码 `LM-Steer\experiments\training\data.py` 中的 `load_dataset` 函数查看。
+	- `data_dir`：指定数据集文件路径，但部分远程数据集（如 `sst-5`）无需此参数。 
+- **数据采样脚本功能** 
+	- **用途**：从 `prompt` 数据集中随机抽取指定数量的数据，用于生成阶段，避免全量数据生成的耗时问题，加速实验迭代。 
+	- **执行方式**：直接运行脚本并指定采样数量（具体参数见脚本说明）。
+#### 3. **生成阶段（evaluate）** 
+#### 1. `eval_file` 
+- **作用**：生成阶段的输入文件，存放用于引导生成的 `prompts` 路径。
+- **格式**：通常为 `prompt.json` 等结构化文件。
+#### 2. `output_file` 
+- **作用**：生成阶段的输出文件，用于保存模型生成的语句内容。 **注意该参数不需要额外指定文件夹，默认和`eval_file`处于同一个文件夹下。**
+#### 3. `metrics`
+- 指定需要评估哪些指标，例如 `dist-n` 说明要评估生成文本的多样性。具体查看 `LM-Steer\experiments\evaluation\evaluate.py`文件 
 
+### **支持的模型与参数规范** 
+#### 1. **模型参数（`model`）**
+- **功能**：通过 `model` 参数指定实验使用的模型（如 `gpt2-medium`、`gpt2-small` 等）。
+- **文件规范**：不同模型的训练 checkpoint 和日志文件需存放在独立文件夹中，命名可参考 `ckpt_name`、`output_file` 等参数的命名规则。
+- **模型列表**：支持的模型可通过 `get_module.py` 文件查看。 
+#### 2. **Adaptor 类型（`adaptor_class`）** 
+- **功能**：指定 `LM-Steer` 模块类型，控制模型的适配逻辑。
+- **参数范围**：支持的参数值定义在 `LM-Steer\lm_steer\models\steers.py` 文件中。
+- **注意事项**：训练阶段（Train）与生成阶段（Generate）的 `adaptor_class` 需保持一致，确保模型适配逻辑统一。
 
-## Introduction
-
-
-![](assets/overview_fig.jpg)
-
-Language models (LMs) automatically learn word embeddings during pre-training on language corpora. Although word embeddings are usually interpreted as feature vectors for individual words, their roles in language model generation remain underexplored. In this work, we theoretically and empirically revisit output word embeddings and find that their linear transformations are equivalent to steering language model generation styles. We name such steers LM-Steers and find them existing in LMs of all sizes. It requires learning parameters equal to 0.2\% of the original LMs' size for steering each style.
-
-
-<img src="assets/detoxification.jpg" alt="Image 1" width="45%" style="vertical-align: top;">
-On tasks such as language model detoxification and sentiment control, LM-Steers can achieve comparable or superior performance compared with state-of-the-art controlled generation methods while maintaining a better balance with generation quality.
-
-<p align="center">
-  <img src="assets/dimensions.jpg" alt="Image 1" width="65%">
-  <img src="assets/keywords.jpg" alt="Image 2" width="34%">
-</p>
-
-The learned LM-Steer serves as a lens in text styles: it reveals that word embeddings are interpretable when associated with language model generations, and can highlight text spans that most indicate the style differences.
-
-<img src="assets/switch_transfer.jpg" alt="Image 1" width="65%">
-
-A LM-Steer is transferrable between different language models by an explicit-form calculation.
-
-<p align="center">
-  <img src="assets/linear.jpg" alt="Image 1" width="45%">
-  <img src="assets/compositional.jpg" alt="Image 2" width="45%">
-</p>
-
-
-One can also continuously steer LMs simply by scaling the LM-Steer, or compose multiple LM-Steers by adding their transformations.
-
-
-## Table of Contents
-
-- [🛞 LM-Steer: Word Embeddings Are Steers for Language Models](#-lm-steer-word-embeddings-are-steers-for-language-models)
-  - [Introduction](#introduction)
-  - [Table of Contents](#table-of-contents)
-  - [Requirements](#requirements)
-  - [Usage](#usage)
-    - [1. Preparing Data](#1-preparing-data)
-    - [2. Training and Evaluation](#2-training-and-evaluation)
-      - [2.1. LM-Steer for Detoxification](#21-lm-steer-for-detoxification)
-      - [2.2. LM-Steer for Sentiment Control](#22-lm-steer-for-sentiment-control)
-    - [3. Other Analytical Experiments](#3-other-analytical-experiments)
-      - [3.1. LM-Steer Interpretation](#31-lm-steer-interpretation)
-      - [3.2. LM-Steer Transfer](#32-lm-steer-transfer)
-      - [3.3. LM-Steer Composition and Continuous Steering](#33-lm-steer-composition-and-continuous-steering)
-  - [Citation](#citation)
-
-
-## Requirements
-
+### 毒性控制实验复现
+#### 训练
+```bash
+./detoxification_sentiment_continual_control.sh 1
 ```
-kaggle
-torch
-transformers
-datasets
-numpy
-pandas
-googleapiclient
+#### 生成
+```bash
+./detoxification_sentiment_continual_control.sh 2 [采样数量]
 ```
-
-
-## Usage
-
-### 1. Preparing Data
-
-Following the setting in [MuCoLa](https://arxiv.org/abs/2205.12558),
-we download the training data from Kaggle toxic comment classification challenge.
-We use prompts from MuCoLa's code repository
-(placed under `data/prompts`),
-which contains prompts for sentiment control and toxicity removal.
-
-Commands for acquiring training data
-(you need to setup a Kaggle account and configure the Kaggle API key):
+#### 评估
+```bash
+./detoxification_sentiment_continual_control.sh 3
 ```
-# training data 
-kaggle competitions download -c jigsaw-unintended-bias-in-toxicity-classification
-unzip jigsaw-unintended-bias-in-toxicity-classification.zip -d data/toxicity/jigsaw-unintended-bias-in-toxicity-classification
-rm jigsaw-unintended-bias-in-toxicity-classification.zip
-
-# processing
-bash data/toxicity/toxicity_preprocess.sh \
-    data/toxicity/jigsaw-unintended-bias-in-toxicity-classification
+- **训练数据集**：`data/toxicity/jigsaw-unintended-bias-in-toxicity-classification`
+- **生成和评估的文件路径**：`logs/detoxification-gpt2-large`
+- **默认模型**：`gpt2-large`（可自行指定）
+- **adaptor_class 默认值**：`multiply`（可自行指定）
+- **默认采样脚本启用**，采样数量为500。若要跑全量测试，则使用`data/prompts/nontoxic_prompts-10k.jsonl`引导数据集，注意修改相关参数。
+- **默认评估指标**：`toxicity,ppl-big,dist-n`
+### 情感控制复现
+#### 运行
+```bash
+LM-Steer/sentiment_control.sh
 ```
-
-
-
-### 2. Training and Evaluation
-
-
-#### 2.1. LM-Steer for Detoxification
-
-Using GPT2-Large as the base model, we train a LM-Steer for detoxification.
-
+#### 参数指定
+- **source**：指定使用什么倾向的prompts来generate（`positive`, `neutral`, `negative`）
+- **control**：指定模型生成的情感倾向，分为两档 `-5`（negative）和 `5`（positive）。
+- **训练数据集**：`sentiment-sst5`（远程数据集）
+- **引导词数据集**：`data/prompts/sentiment_prompts-10k/${source}_prompts.jsonl`
+- **默认不开启数据采样脚本**
+- **模型**：默认使用`gpt2-large`，可以自行指定
+- **评估指标**：`sentiment,ppl-big,dist-n`
+- **adaptor_class 默认值**：`multiply`（可自行指定）
+- **生成的checkpoint和相关的文件路径**：`logs/sentiment-gpt2-large`
+### 模型迁移实验复现
+#### 运行
+```bash
+LM-Steer/steer_transfer.sh
 ```
-
-TRIAL=detoxification-gpt2-large
-mkdir -p logs/$TRIAL
-PYTHONPATH=. python experiments/training/train.py \
-    --dataset_name toxicity \
-    --data_dir data/toxicity/jigsaw-unintended-bias-in-toxicity-classification \
-    --ckpt_name logs/$TRIAL/checkpoint.pt \
-    --model gpt2-large --cuda \
-    --adaptor_class multiply --num_steers 2 --dummy_steer 1 --rank 1000 \
-    --batch_size 32 --max_length 256 \
-    --n_steps 1000 --lr 1e-2
-
-PYTHONPATH=. python experiments/training/generate.py \
-    --eval_file data/prompts/nontoxic_prompts-10k.jsonl \
-    --output_file logs/$TRIAL/predictions.jsonl \
-    --ckpt_name logs/$TRIAL/checkpoint.pt \
-    --model gpt2-large --cuda \
-    --adaptor_class multiply --num_steers 2 --rank 1000 \
-    --max_length 256 --verbose --steer_values 5 1
-
+#### 参数修改
+- **ckpt_name**：训练好的，等待被迁移的模型路径
+- **output_file**：目标模型的路径
+- **其余参数按命名规范修改**，具体请查阅相关代码
+### 连续控制实验
+#### 执行
+```bash
+./detoxification_sentiment_continual_control.sh 7
 ```
-
-The prediction file will be saved at `logs/$TRIAL/predictions.jsonl`.
-We can evaluate the predictions using the following command.
-To evaluate with the Perspective API from google cloud, you need to set the `export GOOGLE_API_KEY=xxxxxxx` environment variable.
-Otherwise, you can remove the "toxicity" metric from the evaluation script.
-
+- **默认进行数据采样**，采样数可以在shell脚本中修改
+- **默认对情感控制进行连续控制实验**，steer values可以自行指定。其余参数作用和之前的实验类似。
+### 协同控制实验
+#### 执行
+```bash
+./detoxification_sentiment_continual_control.sh 8
 ```
-
-python experiments/evaluation/evaluate.py \
-    --generations_file logs/$TRIAL/predictions.jsonl \
-    --metrics toxicity,ppl-big,dist-n \
-    --output_file result_stats.txt
-echo "Detoxification results:"
-cat logs/$TRIAL/result_stats.txt
-
+- **实验参数和连续控制实验类似**，不再赘述。
+### 风格迁移实验
+#### 训练
+```bash
+formal_train.sh
 ```
-
-The evaluation script will output the evaluation results to `logs/$TRIAL/result_stats.txt`.
-
-
-#### 2.2. LM-Steer for Sentiment Control
-
-In this task, one is required to control the sentiment of the generated text in either positive or negative direction.
-When evaluating the ability towards a positive sentiment, the model is prompted on both neutral and negative prompts.
-When evaluating the ability towards a negative sentiment, the model is prompted on both neutral and positive prompts.
-So there are four evaluation settings in total.
-Here shows an example of training a LM-Steer for negative sentiment control and evaluated on positive prompts.
-
-Our code scores and re-uses trained models, so you can train a model once and evaluate it multiple times in different settings without re-training.
-
+#### 生成
+```bash
+formal_generate.sh
 ```
-
-TRIAL=sentiment-gpt2-large
-mkdir -p logs/$TRIAL
-
-source=positive
-control=-5
-PYTHONPATH=. python experiments/training/train.py \
-    --dataset_name sentiment-sst5 \
-    --ckpt_name logs/$TRIAL/checkpoint.pt \
-    --model gpt2-large --cuda \
-    --adaptor_class multiply --num_steers 2 --dummy_steer 1 --rank 1000 \
-    --batch_size 32 --max_length 256 \
-    --n_steps 1000 --lr 1e-2 --regularization 1e-6 --epsilon 1e-3
-PYTHONPATH=. python experiments/training/generate.py \
-    --eval_file data/prompts/sentiment_prompts-10k/${source}_prompts.jsonl \
-    --output_file logs/$TRIAL/predictions-${source}_${control}.jsonl \
-    --ckpt_name logs/$TRIAL/checkpoint.pt \
-    --model gpt2-large --cuda \
-    --adaptor_class multiply --num_steers 2 --rank 1000 \
-    --max_length 256 --verbose --steer_values ${control} 1 --top_p 0.9
-
-
-python experiments/evaluation/evaluate.py \
-    --generations_file logs/$TRIAL/predictions-${source}_${control}.jsonl \
-    --metrics sentiment,ppl-big,dist-n \
-    --output_file result_stats_${source}_${control}.txt
-echo "Sentiment control results:"
-cat logs/$TRIAL/result_stats_${source}_${control}.txt
-
+#### 评估
+```bash
+formal_evaluate.sh
 ```
-
-
-### 3. Other Analytical Experiments
-
-
-#### 3.1. LM-Steer Interpretation
-
-We use the script `experiments/pca_analysis.py` to interpret word embeddings dimensions that are most relevant to the task of detoxification.
-To run the script, you need to specify the path to the trained LM-Steer checkpoint and the `GOOGLE_API_KEY` environment variable for the Perspective API.
-
-Please specify `$PATH_TO_CHECKPOINT` as the path to the trained LM-Steer checkpoint.
+- **参数和之前实验类似**
+- **特别注意**：`dataset_name` 该参数指定为`toxicity`，是因为该实验的数据集是组内自己整理的，数据处理格式按照`toxicity`数据集的格式处理。将`dataset_name` 该参数指定为`toxicity`可以借用现成的数据处理代码。
+### 中文扩展实验
+#### 运行
+```bash
+detoxification_gpt_zh.sh
 ```
-PYTHONPATH=. python experiments/pca_analysis.py \
-    $PATH_TO_CHECKPOINT
+- **这里的模型需要使用支持中文的模型**，默认使用`uer/gpt2-large-chinese-cluecorpussmall`，可以选用Qwen模型。
+- **默认使用毒性控制数据集**，可以选用情感控制。
+- **其余参数与其他实验类似**。
+### 输入层词嵌入实验
+#### 运行
+```bash
+input_ex.sh
 ```
-
-
-#### 3.2. LM-Steer Transfer
-
-We can transfer a trained LM-Steer from one model to another.
-Please specify `$CHECKPOINT1` as the path to the trained LM-Steer checkpoint and `$CHECKPOINT2` as the path to the target model checkpoint.
-Here is an example of transferring a LM-Steer from GPT2-Large to GPT2-Medium.
-
+- **具体运行参数（4，5， 6 ， 7）请阅读注释**
+- **默认在情感控制数据集上进行试验**。脚本参数和上面的实验类似，不在赘述。
+### 自适应情感控制
+#### 运行
+```bash
+auto_sentiment_control.sh
 ```
-
-PYTHONPATH=. python experiments/steer_transfer.py \
-    --ckpt_name $CHECKPOINT1
-    --n_steps 5000 --lr 0.01 --top_k 10000 \
-    --model_name gpt2-medium \
-    --transfer_from gpt2-large \
-    --output_file $CHECKPOINT2
-
+- **不需要修改任何参数**，直接运行即可。
+### 非线性的控制器
+#### 运行
+```bash
+nonlinear_sentiment_control.sh
 ```
-
-
-#### 3.3. LM-Steer Composition and Continuous Steering
-
-To achieve a more fine-grained control over the text style, we can compose multiple LM-Steers or continuously steer the LM.
-For continuous steering, we can simply ajust the `steer_values` parameter in the training script,
-such as `--steer_values 3 1`, `--steer_values 0 1`, or `--steer_values -1 1` for different steering effects.
-
-For composing multiple LM-Steers, you can simply add the matrices of the LM-Steers and use the sum as the final LM-Steer.
-Alternatively, you can concatenate the LM-Steers and use the concatenated tensor
-(which is a longer list of matrices in the `self.projector1` and `self.projector2` attributes in the `lm_steer/models/steer.py` file).
-
-
-## Citation
-
-If you find this repository helpful, please consider citing our paper:
-
-```
-@article{han2023lm,
-  title={Lm-switch: Lightweight language model conditioning in word embedding space},
-  author={Han, Chi and Xu, Jialiang and Li, Manling and Fung, Yi and Sun, Chenkai and Jiang, Nan and Abdelzaher, Tarek and Ji, Heng},
-  journal={arXiv preprint arXiv:2305.12798},
-  year={2023}
-}
-```
+- **默认在情感控制数据集上进行试验**
+- **参数和情感控制复现实验类似**，不再赘述。
+- **注意**：`adaptor_class` 需指定为`nonlinear`
