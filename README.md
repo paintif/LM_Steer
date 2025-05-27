@@ -79,7 +79,7 @@
 ### 情感控制复现
 #### 运行
 ```bash
-LM-Steer/sentiment_control.sh
+./sentiment_control.sh
 ```
 #### 参数指定
 - **source**：指定使用什么倾向的prompts来generate（`positive`, `neutral`, `negative`）
@@ -94,7 +94,7 @@ LM-Steer/sentiment_control.sh
 ### 模型迁移实验复现
 #### 运行
 ```bash
-LM-Steer/steer_transfer.sh
+./steer_transfer.sh
 ```
 #### 参数修改
 - **ckpt_name**：训练好的，等待被迁移的模型路径
@@ -116,22 +116,22 @@ LM-Steer/steer_transfer.sh
 ### 风格迁移实验
 #### 训练
 ```bash
-formal_train.sh
+./formal_train.sh
 ```
 #### 生成
 ```bash
-formal_generate.sh
+./formal_generate.sh
 ```
 #### 评估
 ```bash
-formal_evaluate.sh
+./formal_evaluate.sh
 ```
 - **参数和之前实验类似**
 - **特别注意**：`dataset_name` 该参数指定为`toxicity`，是因为该实验的数据集是组内自己整理的，数据处理格式按照`toxicity`数据集的格式处理。将`dataset_name` 该参数指定为`toxicity`可以借用现成的数据处理代码。
 ### 中文扩展实验
 #### 运行
 ```bash
-detoxification_gpt_zh.sh
+./detoxification_gpt_zh.sh
 ```
 - **这里的模型需要使用支持中文的模型**，默认使用`uer/gpt2-large-chinese-cluecorpussmall`，可以选用Qwen模型。
 - **默认使用毒性控制数据集**，可以选用情感控制。
@@ -139,14 +139,14 @@ detoxification_gpt_zh.sh
 ### 输入层词嵌入实验
 #### 运行
 ```bash
-input_ex.sh
+./input_ex.sh
 ```
 - **具体运行参数（4，5， 6 ， 7）请阅读注释**
 - **默认在情感控制数据集上进行试验**。脚本参数和上面的实验类似，不在赘述。
 ### 自适应情感控制
 #### 运行
 ```bash
-auto_sentiment_control.sh
+./auto_sentiment_control.sh
 ```
 - **不需要修改任何参数**，直接运行即可。
 ### 非线性的控制器
