@@ -68,7 +68,7 @@
 ```
 #### 评估
 ```bash
-./detoxification_sentiment_continual_control.sh 3
+./detoxification_sentiment_continual_control.sh 3 [采样数量]
 ```
 - **训练数据集**：`data/toxicity/jigsaw-unintended-bias-in-toxicity-classification`
 - **生成和评估的文件路径**：`logs/detoxification-gpt2-large`
