@@ -68,7 +68,7 @@ class Projected_Adaptor(nn.Module):
         else:
             raise NotImplementedError()
 
-        # 保存配置参数
+        # 保存配置参数 
         self.adaptor_class = adaptor_class
         self.rank = rank
         self.lm_head = lm_head
